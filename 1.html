@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSOCIAL</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        msblue: '#0095f6',
+                        msbluehover: '#1877f2',
+                        mscard: '#ffffff',
+                        msborder: '#dbdbdb',
+                        mstext: '#262626',
+                        msmuted: '#8e8e8e'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body id="body-bg" class="bg-[#f0f4f8] text-mstext min-h-screen font-sans selection:bg-msblue selection:text-white pb-20 md:pb-0">
+
+    <!-- Auth Modal (No Passwords Required) -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white border border-msborder rounded-3xl w-full max-w-sm p-8 shadow-2xl text-center">
+            <div class="mb-6">
+                <i class="fa-solid fa-globe text-msblue text-5xl mb-2"></i>
+                <h1 class="text-3xl font-black tracking-tight text-mstext">MSOCIAL</h1>
+                <p class="text-msmuted text-sm mt-1">Instant private chats, free photo posting, and true social pages.</p>
+            </div>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-msmuted uppercase mb-1">Your Full Name</label>
+                    <input type="text" id="auth-name" required placeholder="e.g. Alex Morgan" class="w-full bg-[#fafafa] border border-msborder rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-msblue transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-msmuted uppercase mb-1">Username (@handle)</label>
+                    <input type="text" id="auth-username" required placeholder="e.g. alexmorgan" class="w-full bg-[#fafafa] border border-msborder rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-msblue transition">
+                </div>
+                <button type="submit" class="w-full bg-msblue hover:bg-msbluehover text-white font-bold py-3 rounded-xl transition shadow-lg shadow-msblue/30 mt-2">Enter MSOCIAL</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app-container" class="max-w-5xl mx-auto min-h-screen flex flex-col md:flex-row hidden">
+       
+        <!-- Desktop Sidebar Navigation -->
+        <header class="hidden md:flex w-64 bg-white border-r border-msborder flex-col justify-between p-6 h-screen sticky top-0 z-40 shadow-sm">
+            <div class="space-y-8">
+                <div class="flex items-center space-x-3 px-2">
+                    <i class="fa-solid fa-globe text-msblue text-3xl"></i>
+                    <span class="text-2xl font-black tracking-wider text-mstext">MSOCIAL</span>
+                </div>
+                <nav class="space-y-2">
+                    <button onclick="switchPage('home')" id="nav-home" class="w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl hover:bg-gray-100 text-base transition font-bold text-msblue">
+                        <i class="fa-solid fa-house w-6 text-center text-xl"></i>
+                        <span>Home Page</span>
+                    </button>
+                    <button onclick="switchPage('chats')" id="nav-chats" class="w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl hover:bg-gray-100 text-base transition text-mstext">
+                        <i class="fa-solid fa-comments w-6 text-center text-xl"></i>
+                        <span>Chats Page</span>
+                    </button>
+                    <button onclick="switchPage('profile')" id="nav-profile" class="w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl hover:bg-gray-100 text-base transition text-mstext">
+                        <i class="fa-solid fa-user w-6 text-center text-xl"></i>
+                        <span>Profile Page</span>
+                    </button>
+                    <button onclick="switchPage('customize')" id="nav-customize" class="w-full flex items-center space-x-4 px-4 py-3.5 rounded-2xl hover:bg-gray-100 text-base transition text-mstext">
+                        <i class="fa-solid fa-palette w-6 text-center text-xl"></i>
+                        <span>Customize</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile Summary & Logout Footer -->
+            <div class="p-3 rounded-2xl bg-gray-50 border border-msborder flex items-center justify-between cursor-pointer hover:bg-gray-100 transition" onclick="switchPage('profile')">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div id="sidebar-avatar" class="w-10 h-10 rounded-full bg-msblue flex items-center justify-center font-bold text-white shrink-0 shadow">U</div>
+                    <div class="truncate">
+                        <div id="sidebar-name" class="font-bold text-sm truncate text-mstext">Name</div>
+                        <div id="sidebar-handle" class="text-msmuted text-xs truncate">@handle</div>
+                    </div>
+                </div>
+                <button onclick="logout(event)" class="text-msmuted hover:text-red-500 p-2 transition" title="Log out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Bottom Navigation Bar -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-msborder flex justify-around items-center p-3 z-50 shadow-lg">
+            <button onclick="switchPage('home')" id="mob-nav-home" class="p-3 text-msblue text-xl"><i class="fa-solid fa-house"></i></button>
+            <button onclick="switchPage('chats')" id="mob-nav-chats" class="p-3 text-mstext text-xl"><i class="fa-solid fa-comments"></i></button>
+            <button onclick="switchPage('profile')" id="mob-nav-profile" class="p-3 text-mstext text-xl"><i class="fa-solid fa-user"></i></button>
+            <button onclick="switchPage('customize')" id="mob-nav-customize" class="p-3 text-mstext text-xl"><i class="fa-solid fa-palette"></i></button>
+        </nav>
+
+        <!-- Main Dynamic Pages Container -->
+        <main class="flex-1 md:p-8 max-w-2xl mx-auto w-full min-h-screen">
+           
+            <!-- ================= PAGE 1: HOME PAGE ================= -->
+            <div id="page-home" class="page-content space-y-6">
+                <!-- Top Header -->
+                <div class="bg-white border-b md:border border-msborder md:rounded-3xl px-6 py-4 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-black text-mstext">Home Feed</h2>
+                        <p class="text-xs text-msmuted">See what your friends are sharing</p>
+                    </div>
+                    <button onclick="switchPage('chats')" class="md:hidden bg-msblue/10 text-msblue px-4 py-2 rounded-xl font-bold text-sm">
+                        <i class="fa-solid fa-comments mr-1"></i> Chats
+                    </button>
+                </div>
+
+                <!-- Easy Post Creator Box -->
+                <div class="bg-white border border-msborder rounded-3xl p-5 shadow-sm space-y-4 mx-4 md:mx-0">
+                    <div class="flex items-start space-x-3">
+                        <div id="create-avatar" class="w-10 h-10 rounded-full bg-msblue flex items-center justify-center font-bold text-white shrink-0 shadow">U</div>
+                        <textarea id="post-text" placeholder="What's happening? Share a thought or moment..." rows="2" class="w-full bg-[#fafafa] border border-msborder rounded-2xl p-3 text-sm placeholder-msmuted focus:outline-none focus:border-msblue resize-none"></textarea>
+                    </div>
+
+                    <!-- Image Preview Container -->
+                    <div id="image-preview-container" class="relative hidden">
+                        <img id="image-preview" src="" class="rounded-2xl max-h-56 object-cover w-full border border-msborder">
+                        <button onclick="removeImage()" class="absolute top-3 right-3 bg-black/70 hover:bg-black text-white w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <label class="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 text-mstext">
+                            <i class="fa-regular fa-image text-msblue text-base"></i>
+                            <span>Attach Picture</span>
+                            <input type="file" id="post-image-input" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+                        </label>
+                        <button onclick="createPost()" class="bg-msblue hover:bg-msbluehover text-white font-bold px-6 py-2 rounded-xl text-sm transition shadow-sm">Post Now</button>
+                    </div>
+                </div>
+
+                <!-- Feed Stream -->
+                <div id="posts-feed" class="space-y-6 mx-4 md:mx-0">
+                    <!-- Dynamic Posts Here -->
+                </div>
+            </div>
+
+            <!-- ================= PAGE 2: CHATS PAGE ================= -->
+            <div id="page-chats" class="page-content hidden h-[90vh] md:h-[85vh] flex flex-col p-4 md:p-0">
+                <div class="bg-white border border-msborder rounded-3xl shadow-sm flex-1 flex flex-col md:flex-row overflow-hidden">
+                   
+                    <!-- Conversations List Column -->
+                    <div id="chats-sidebar-col" class="w-full md:w-80 border-r border-msborder flex flex-col bg-[#fafafa] h-full">
+                        <div class="p-4 border-b border-msborder flex items-center justify-between bg-white">
+                            <h3 class="font-bold text-lg">Messages</h3>
+                            <button onclick="startNewChatPrompt()" class="bg-msblue text-white font-semibold px-3 py-1.5 rounded-xl text-xs transition shadow-sm">
+                                <i class="fa-solid fa-plus mr-1"></i> New Chat
+                            </button>
+                        </div>
+                        <div id="conversations-list" class="flex-1 overflow-y-auto divide-y divide-msborder/50">
+                            <!-- Convo items -->
+                        </div>
+                    </div>
+
+                    <!-- Active Conversation Message Window -->
+                    <div id="chats-window-col" class="flex-1 flex flex-col bg-white hidden md:flex h-full">
+                        <div id="chat-header" class="p-4 border-b border-msborder font-bold flex items-center justify-between bg-white">
+                            <span class="text-msmuted text-sm font-normal">Select a chat on the left to start messaging</span>
+                        </div>
+                        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-[#fdfdfd]">
+                            <!-- Messages -->
+                        </div>
+                        <div id="chat-input-area" class="p-3 border-t border-msborder bg-white hidden">
+                            <form onsubmit="sendMessage(event)" class="flex gap-2">
+                                <input type="text" id="chat-msg-input" placeholder="Type a private message..." class="flex-1 bg-[#fafafa] border border-msborder rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-msblue">
+                                <button type="submit" class="bg-msblue hover:bg-msbluehover text-white px-5 py-2.5 rounded-full font-bold text-sm transition"><i class="fa-solid fa-paper-plane"></i></button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ================= PAGE 3: PROFILE PAGE ================= -->
+            <div id="page-profile" class="page-content hidden space-y-6 mx-4 md:mx-0">
+                <!-- Profile Header -->
+                <div class="bg-white border border-msborder rounded-3xl p-6 shadow-sm">
+                    <div class="flex items-center space-x-6">
+                        <div id="profile-avatar" class="w-24 h-24 rounded-full bg-msblue border-4 border-white flex items-center justify-center text-4xl font-bold text-white shadow-md shrink-0">U</div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                <h3 id="profile-name" class="text-2xl font-black text-mstext truncate">Name</h3>
+                                <button onclick="openEditProfile()" class="border border-msborder hover:bg-gray-50 font-bold px-4 py-2 rounded-xl text-sm transition">Edit Profile</button>
+                            </div>
+                            <p id="profile-handle" class="text-msmuted text-sm mb-3">@handle</p>
+                            <p id="profile-bio" class="text-mstext text-sm whitespace-pre-line mb-4">No bio yet.</p>
+                            <div class="flex space-x-6 text-sm text-mstext font-semibold">
+                                <div><span id="profile-post-count" class="font-bold">0</span> posts published</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Posts Grid/List with Free Deletion -->
+                <div class="bg-white border border-msborder rounded-3xl p-6 shadow-sm">
+                    <h4 class="font-bold text-lg mb-4 pb-2 border-b border-msborder">Your Posts & Uploaded Pictures</h4>
+                    <div id="user-posts-feed" class="space-y-6">
+                        <!-- User Posts Here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 4: CUSTOMIZE PAGE ================= -->
+            <div id="page-customize" class="page-content hidden bg-white border border-msborder rounded-3xl p-6 shadow-sm mx-4 md:mx-0">
+                <h2 class="text-2xl font-black mb-2">Customize Appearance</h2>
+                <p class="text-msmuted text-sm mb-6">Instantly change your background color to any tone you like.</p>
+               
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold mb-3 text-mstext">Preset Backgrounds</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="setTheme('#f0f4f8')" class="p-4 rounded-2xl border border-msborder bg-[#f0f4f8] text-left font-bold hover:border-msblue transition flex items-center justify-between text-sm">Light Blue <span class="w-4 h-4 rounded-full bg-[#f0f4f8] border border-gray-400"></span></button>
+                            <button onclick="setTheme('#ffffff')" class="p-4 rounded-2xl border border-msborder bg-white text-left font-bold hover:border-msblue transition flex items-center justify-between text-sm">Pure White <span class="w-4 h-4 rounded-full bg-white border border-gray-400"></span></button>
+                            <button onclick="setTheme('#fffbeb')" class="p-4 rounded-2xl border border-msborder bg-[#fffbeb] text-left font-bold hover:border-msblue transition flex items-center justify-between text-sm">Soft Cream <span class="w-4 h-4 rounded-full bg-[#fffbeb]"></span></button>
+                            <button onclick="setTheme('#0f172a')" class="p-4 rounded-2xl border border-msborder bg-[#0f172a] text-white text-left font-bold hover:border-msblue transition flex items-center justify-between text-sm">Midnight Dark <span class="w-4 h-4 rounded-full bg-[#0f172a]"></span></button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-mstext">Custom Color Picker</label>
+                        <div class="flex gap-3">
+                            <input type="color" id="color-picker" onchange="setTheme(this.value)" class="w-12 h-12 bg-transparent rounded-2xl cursor-pointer border border-msborder p-1">
+                            <input type="text" id="color-text-input" placeholder="#f0f4f8" class="flex-1 bg-[#fafafa] border border-msborder rounded-2xl px-4 text-sm focus:outline-none focus:border-msblue">
+                            <button onclick="applyCustomColor()" class="bg-msblue text-white px-5 py-2.5 rounded-2xl font-bold text-sm hover:bg-msbluehover transition">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-msborder rounded-3xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-msborder pb-3">
+                <h3 class="text-lg font-bold">Edit Profile</h3>
+                <button onclick="closeEditProfile()" class="text-msmuted hover:text-mstext text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-msmuted uppercase mb-1">Name</label>
+                    <input type="text" id="edit-name" required class="w-full bg-[#fafafa] border border-msborder rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-msblue">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-msmuted uppercase mb-1">Bio</label>
+                    <textarea id="edit-bio" rows="3" class="w-full bg-[#fafafa] border border-msborder rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-msblue resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-msblue hover:bg-msbluehover text-white font-bold py-3 rounded-xl text-sm transition">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        let currentUser = JSON.parse(localStorage.getItem('msocial_user')) || null;
+        let posts = JSON.parse(localStorage.getItem('msocial_posts')) || [
+            { id: '1', name: 'MSOCIAL Official', handle: 'msocial', text: 'Welcome to MSOCIAL! Check out our new dedicated pages, post pictures freely, and chat with friends privately.', image: '', timestamp: '2h ago', likes: 18 }
+        ];
+        let users = JSON.parse(localStorage.getItem('msocial_users')) || { 'msocial': { name: 'MSOCIAL Official', handle: 'msocial', bio: 'Official MSOCIAL support account.' } };
+        let messages = JSON.parse(localStorage.getItem('msocial_messages')) || {};
+        let currentChatUser = null;
+        let tempPostImage = '';
+
+        window.onload = function() {
+            const savedBg = localStorage.getItem('msocial_bg') || '#f0f4f8';
+            setTheme(savedBg, false);
+
+            if (!currentUser) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+                document.getElementById('app-containe            const chatId = [currentUser.handle, currentChatUser].sort().join('_');
+            if(!messages[chatId]) messages[chatId] = [];
+
+            messages[chatId].push({
+                sender: currentUser.handle,
+                text: text,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            localStorage.setItem('msocial_messages', JSON.stringify(messages));
+            input.value = '';
+            renderChatMessages();
+            renderConversations();
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            if(!currentChatUser) {
+                container.innerHTML = `<div class="text-center text-msmuted mt-20">Select a conversation from the left to start messaging.</div>`;
+                return;
+            }
+
+            const chatId = [currentUser.handle, currentChatUser].sort().join('_');
+            const chatList = messages[chatId] || [];
+
+            container.innerHTML = chatList.length === 0 ? `
+                <div class="text-center text-msmuted mt-20">No messages yet. Say hello to @${currentChatUser}!</div>
+            ` : chatList.map(m => `
+                <div class="flex flex-col ${m.sender === currentUser.handle ? 'items-end' : 'items-start'}">
+                    <div class="max-w-xs md:max-w-md px-4 py-2.5 rounded-2xl text-sm ${m.sender === currentUser.handle ? 'bg-msblue text-white rounded-br-xs' : 'bg-gray-100 text-mstext rounded-bl-xs border border-msborder/40'}">
+                        ${escapeHtml(m.text)}
+                    </div>
+                    <span class="text-[10px] text-msmuted mt-1 px-1">${m.timestamp}</span>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderConversations() {
+            const container = document.getElementById('conversations-list');
+            const chattedHandles = new Set();
+            Object.keys(messages).forEach(chatId => {
+                if(chatId.includes(currentUser.handle)) {
+                    const parts = chatId.split('_');
+                    const other = parts[0] === currentUser.handle ? parts[1] : parts[0];
+                    chattedHandles.add(other);
+                }
+            });
+
+            if(chattedHandles.size === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-msmuted text-sm">No chats yet.<br>Click 'New Chat' above.</div>`;
+                return;
+            }
+
+            container.innerHTML = Array.from(chattedHandles).map(handle => {
+                const u = users[handle] || { name: handle, handle: handle };
+                const isActive = currentChatUser === handle;
+                return `
+                    <div onclick="openChatWith('${handle}')" class="p-3 flex items-center space-x-3 hover:bg-gray-100 cursor-pointer transition ${isActive ? 'bg-gray-100 border-l-4 border-msblue' : ''}">
+                        <div class="w-10 h-10 rounded-full bg-msblue flex items-center justify-center font-bold text-white shrink-0">${u.name.charAt(0).toUpperCase()}</div>
+                        <div class="overflow-hidden">
+                            <div class="font-bold text-sm truncate text-mstext">${u.name}</div>
+                            <div class="text-msmuted text-xs truncate">@${handle}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- CUSTOMIZATION ---
+        function setTheme(color, save = true) {
+            document.getElementById('body-bg').style.backgroundColor = color;
+            document.getElementById('color-text-input').value = color;
+            if(save) {
+                localStorage.setItem('msocial_bg', color);
+            }
+        }
+
+        function applyCustomColor() {
+            const val = document.getElementById('color-text-input').value.trim();
+            if(val) setTheme(val);
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
